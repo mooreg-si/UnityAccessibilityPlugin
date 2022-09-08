@@ -28,6 +28,11 @@ public class UAP_AudioQueue : MonoBehaviour
 	/// </summary>
 	private int m_SpeechRate = 65;
 
+	/// <summary>
+    /// The name of the current screen reader voice
+    /// </summary>
+	private string m_SpeechVoice = "";
+
 	private AudioSource m_AudioPlayer = null;
 	private Queue<SAudioEntry> m_AudioQueue = new Queue<SAudioEntry>();
 	private SAudioEntry m_ActiveEntry = null;
@@ -622,6 +627,14 @@ public class UAP_AudioQueue : MonoBehaviour
 		if (m_SpeechRate > 100)
 			m_SpeechRate = 100;
 
+		#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+			if (UAP_AccessibilityManager.UseWindowsTTS() && WindowsTTS.instance != null)
+			{
+				//use WindowsTTS to set the rate
+				WindowsTTS.SetSpeechRate(m_SpeechRate);
+			}
+		#endif
+
 		PlayerPrefs.SetInt("Accessibility_Speech_Rate", m_SpeechRate);
 		PlayerPrefs.Save();
 
@@ -629,6 +642,24 @@ public class UAP_AudioQueue : MonoBehaviour
 	}
 
 	//////////////////////////////////////////////////////////////////////////
+
+	public string SetVoice(string newVoice)
+    {
+		m_SpeechVoice = newVoice;
+
+		#if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
+			if (UAP_AccessibilityManager.UseWindowsTTS() && WindowsTTS.instance != null)
+			{
+				//use WindowsTTS to set the rate
+				WindowsTTS.SetVoice(m_SpeechVoice);
+			}
+		#endif
+
+		return m_SpeechVoice;
+	}
+
+	//////////////////////////////////////////////////////////////////////////
+
 
 	/// <summary>
 	/// This function is used to activate third-party custom Text-to-Speech engines.
